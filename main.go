@@ -18,6 +18,18 @@ func main() {
 	})
 	fmt.Printf("Total amount of %d powered to %d is %d \n\n", a, p, res)
 
+	doneFlags := make(chan struct{}, 4)
+	resCancel := pipeline.LaunchIntegerReducerWithCancellation(&pipeline.IntegerReducerParam{
+		Amount: a,
+		Power:  p,
+	}, doneFlags)
+
+	for i := 0; i < 4; i++ {
+		doneFlags <- struct{}{}
+	}
+	close(doneFlags)
+	fmt.Printf("Total amount of %d powered to %d is %d \n\n", a, p, resCancel)
+
 	// Workers Pool Pattern
 	var buffSize = 100
 	var workerSize = 5
